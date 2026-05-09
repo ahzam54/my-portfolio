@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahzan Imam | Computer Vision & AI Engineer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#a855f7',
+                        accent: '#06b6d4',
+                        dark: '#0f172a',
+                        darker: '#020617',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: #020617; overflow-x: hidden; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a855f7; }
+
+        /* Canvas Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Glow Effects */
+        .glow {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 0 60px rgba(168, 85, 247, 0.1);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-slide-in { animation: slideInUp 0.8s ease-out forwards; }
+
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid #6366f1;
+            animation: typing 3s steps(30) 1s forwards, blink 0.75s step-end infinite;
+            width: 0;
+        }
+
+        /* Skill Bar Animation */
+        .skill-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(99, 102, 241, 0.1);
+            overflow: hidden;
+        }
+
+        .skill-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Timeline */
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #6366f1, #a855f7, #06b6d4);
+        }
+
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6366f1;
+            border: 3px solid #020617;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Nav Link Underline */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* Project Card Image Overlay */
+        .project-overlay {
+            background: linear-gradient(to top, rgba(2, 6, 23, 0.95) 0%, rgba(2, 6, 23, 0.5) 50%, transparent 100%);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        /* Section Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu.open { transform: translateX(0); }
+    </style>
+</head>
+<body class="text-gray-300">
+    <!-- Particle Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="#" class="font-display text-2xl font-bold gradient-text">AI.</a>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#about" class="nav-link text-sm font-medium hover:text-white transition-colors">About</a>
+                    <a href="#skills" class="nav-link text-sm font-medium hover:text-white transition-colors">Skills</a>
+                    <a href="#experience" class="nav-link text-sm font-medium hover:text-white transition-colors">Experience</a>
+                    <a href="#projects" class="nav-link text-sm font-medium hover:text-white transition-colors">Projects</a>
+                    <a href="#education" class="nav-link text-sm font-medium hover:text-white transition-colors">Education</a>
+                    <a href="#contact" class="px-5 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all">Contact</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-white p-2">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 w-72 h-full bg-darker border-l border-primary/20 z-50 p-6">
+            <button id="close-menu" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <div class="flex flex-col space-y-6 mt-12">
+                <a href="#about" class="text-lg font-medium hover:text-white transition-colors mobile-link">About</a>
+                <a href="#skills" class="text-lg font-medium hover:text-white transition-colors mobile-link">Skills</a>
+                <a href="#experience" class="text-lg font-medium hover:text-white transition-colors mobile-link">Experience</a>
+                <a href="#projects" class="text-lg font-medium hover:text-white transition-colors mobile-link">Projects</a>
+                <a href="#education" class="text-lg font-medium hover:text-white transition-colors mobile-link">Education</a>
+                <a href="#contact" class="text-lg font-medium hover:text-white transition-colors mobile-link">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center px-4 pt-16">
+        <div class="max-w-6xl mx-auto text-center relative z-10">
+            <div class="mb-6 inline-block">
+                <span class="badge text-sm px-4 py-1.5 mb-4">
+                    <i class="fas fa-circle text-green-400 text-[8px] mr-2 animate-pulse"></i>
+                    Available for Opportunities
+                </span>
+            </div>
+
+            <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
+                Ahzan <span class="gradient-text">Imam</span>
+            </h1>
+
+            <div class="h-12 md:h-16 mb-8 flex justify-center items-center">
+                <p class="typing-effect text-xl md:text-3xl font-display font-medium text-gray-300" id="typing-text">
+                    Computer Vision & AI Engineer
+                </p>
+            </div>
+
+            <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Building intelligent vision systems, generative AI pipelines, and real-time inference solutions. 
+                Published IEEE researcher specializing in deep learning and neural networks.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+                <a href="#projects" class="px-8 py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-xl hover:shadow-primary/30 transition-all transform hover:scale-105">
+                    View My Work
+                </a>
+                <a href="https://www.linkedin.com/in/ahzan-imam" target="_blank" class="px-8 py-4 rounded-full glass text-white font-semibold hover:border-primary/40 transition-all flex items-center gap-2">
+                    <i class="fab fa-linkedin text-primary"></i>
+                    LinkedIn Profile
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+                <div class="glass-card rounded-2xl p-4">
+                    <div class="text-3xl font-bold gradient-text">4+</div>
+                    <div class="text-sm text-gray-400 mt-1">Projects</div>
+                </div>
+                <div class="glass-card rounded-2xl p-4">
+                    <div class="text-3xl font-bold gradient-text">1</div>
+                    <div class="text-sm text-gray-400 mt-1">IEEE Paper</div>
+                </div>
+                <div class="glass-card rounded-2xl p-4">
+                    <div class="text-3xl font-bold gradient-text">3+</div>
+                    <div class="text-sm text-gray-400 mt-1">Internships</div>
+                </div>
+                <div class="glass-card rounded-2xl p-4">
+                    <div class="text-3xl font-bold gradient-text">30+</div>
+                    <div class="text-sm text-gray-400 mt-1">FPS Real-time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <a href="#about" class="text-gray-500 hover:text-white transition-colors">
+                <i class="fas fa-chevron-down text-2xl"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="relative py-24 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="reveal">
+                    <span class="badge mb-4">About Me</span>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-6">
+                        Passionate about <span class="gradient-text">Intelligent Systems</span>
+                    </h2>
+                    <p class="text-gray-400 leading-relaxed mb-6">
+                        Computer Vision and AI/ML Engineer with hands-on experience building and deploying deep learning models, 
+                        generative AI pipelines, and real-time inference systems. Proficient in YOLOv8, PyTorch, TensorFlow, 
+                        OpenCV, and MediaPipe for object detection, image segmentation, and gesture recognition.
+                    </p>
+                    <p class="text-gray-400 leading-relaxed mb-8">
+                        Published IEEE researcher in Recurrent Neural Networks and sequence modeling. Experienced in MLOps, 
+                        model deployment on cloud platforms (Hugging Face Spaces), and GPU-accelerated inference. 
+                        Seeking to apply expertise in computer vision, neural networks, and LLM integration to solve real-world industrial challenges.
+                    </p>
+
+                    <div class="flex flex-wrap gap-3">
+                        <span class="badge"><i class="fab fa-python mr-2"></i>Python</span>
+                        <span class="badge"><i class="fas fa-brain mr-2"></i>PyTorch</span>
+                        <span class="badge"><i class="fas fa-eye mr-2"></i>OpenCV</span>
+                        <span class="badge"><i class="fas fa-robot mr-2"></i>YOLOv8</span>
+                        <span class="badge"><i class="fas fa-microchip mr-2"></i>ESP32</span>
+                    </div>
+                </div>
+
+                <div class="reveal relative">
+                    <div class="relative w-full aspect-square max-w-md mx-auto">
+                        <div class="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-3xl blur-3xl"></div>
+                        <div class="relative glass-card rounded-3xl p-8 h-full flex flex-col justify-center items-center">
+                            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6 glow">
+                                <span class="text-5xl font-display font-bold text-white">AI</span>
+                            </div>
+                            <h3 class="text-2xl font-display font-bold text-white mb-2">Ahzan Imam</h3>
+                            <p class="text-gray-400 text-center mb-6">Computer Vision & AI Engineer</p>
+
+                            <div class="w-full space-y-3">
+                                <div class="flex items-center gap-3 text-sm">
+                                    <i class="fas fa-envelope text-primary w-5"></i>
+                                    <span>ahzanimam786@gmail.com</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm">
+                                    <i class="fas fa-phone text-primary w-5"></i>
+                                    <span>+91-7992264612</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm">
+                                    <i class="fas fa-map-marker-alt text-primary w-5"></i>
+                                    <span>Jamshedpur, Jharkhand, India</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4 mt-6">
+                                <a href="https://www.linkedin.com/in/ahzan-imam" target="_blank" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors">
+                                    <i class="fab fa-linkedin text-primary"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors">
+                                    <i class="fab fa-github text-white"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors">
+                                    <i class="fas fa-rocket text-accent"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="relative py-24 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <span class="badge mb-4">Technical Arsenal</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+                    Skills & <span class="gradient-text">Expertise</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    A comprehensive toolkit spanning computer vision, deep learning, generative AI, and embedded systems.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Computer Vision -->
+                <div class="glass-card rounded-2xl p-6 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-eye text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-white mb-4">Computer Vision</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>YOLOv8 / Object Detection</span>
+                                <span class="text-primary">95%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="95%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>OpenCV / Image Processing</span>
+                                <span class="text-primary">92%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="92%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>MediaPipe / Gesture Recognition</span>
+                                <span class="text-primary">88%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="88%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Image Segmentation</span>
+                                <span class="text-primary">85%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="85%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deep Learning -->
+                <div class="glass-card rounded-2xl p-6 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-brain text-secondary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-white mb-4">Deep Learning</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>PyTorch</span>
+                                <span class="text-secondary">93%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="93%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>TensorFlow / Keras</span>
+                                <span class="text-secondary">90%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="90%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>CNN / RNN / LSTM</span>
+                                <span class="text-secondary">90%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="90%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Transfer Learning</span>
+                                <span class="text-secondary">87%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="87%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generative AI -->
+                <div class="glass-card rounded-2xl p-6 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-wand-magic-sparkles text-accent text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-white mb-4">Generative AI / LLMs</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Prompt Engineering</span>
+                                <span class="text-accent">92%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="92%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>RAG / LLM Integration</span>
+                                <span class="text-accent">88%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="88%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Hugging Face Transformers</span>
+                                <span class="text-accent">90%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="90%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>NLP Pipelines</span>
+                                <span class="text-accent">85%</span>
+                            </div>
+                            <div class="skill-bar"><div class="skill-fill" data-width="85%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MLOps & Deployment -->
+                <div class="glass-card rounded-2xl p-6 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-rocket text-green-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-white mb-4">MLOps & Deployment</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="badge">Hugging Face Spaces</span>
+                        <span class="badge">REST APIs</span>
+                        <span class="badge">Flask</span>
+                        <span class="badge">Gradio</span>
+                        <span class="badge">CUDA / GPU Inference</span>
+                        <span class="badge">Jupyter Notebook</span>
+                        <span class="badge">Model Deployment</span>
+                    </div>
+                </div>
+
+                <!-- Programming -->
+                <div class="glass-card rounded-2xl p-6 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-code text-orange-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-white mb-4">Programming</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="badge">Python</span>
+                        <span class="badge">NumPy / Pandas</span>
+                        <span class="badge">Scikit-learn</span>
+                        <span class="badge">JavaScript</span>
+                        <span class="badge">C / C++</span>
+                        <span class="badge">SQL / MySQL</span>
+                        <span class="badge">HTML / CSS</span>
+                    </div>
+                </div>
+
+                <!-- IoT & Embedded -->
+                <div class="glass-card rounded-2xl p-6 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-microchip text-pink-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-white mb-4">IoT & Embedded</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="badge">ESP32</span>
+                        <span class="badge">Arduino</span>
+                        <span class="badge">Embedded C</span>
+                        <span class="badge">OLED Displays</span>
+                        <span class="badge">Bluetooth / Wi-Fi</span>
+                        <span class="badge">IoT Security</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="relative py-24 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <span class="badge mb-4">Career Journey</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+                    Professional <span class="gradient-text">Experience</span>
+                </h2>
+            </div>
+
+            <div class="relative">
+                <div class="timeline-line"></div>
+
+                <!-- Experience 1 -->
+                <div class="relative pl-16 pb-12 reveal">
+                    <div class="timeline-dot absolute left-4 top-1"></div>
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-display font-bold text-white">Generative AI Engineer (Intern)</h3>
+                                <p class="text-primary font-medium">Al Wallah</p>
+                            </div>
+                            <span class="badge mt-2 md:mt-0 w-fit">Dec 2025 – Mar 2026</span>
+                        </div>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-primary mt-1 text-xs"></i>
+                                <span>Engineered 6 AI automation tools using Python and LLMs, reducing manual processing time by 40% across repetitive industrial workflows.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-primary mt-1 text-xs"></i>
+                                <span>Applied advanced prompt engineering across 10+ use cases, improving LLM output accuracy and consistency.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-primary mt-1 text-xs"></i>
+                                <span>Deployed 3 generative AI pipelines from prototype to production, improving task automation efficiency by 35% using Flask-based REST APIs.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Experience 2 -->
+                <div class="relative pl-16 pb-12 reveal">
+                    <div class="timeline-dot absolute left-4 top-1"></div>
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-display font-bold text-white">Industrial Trainee</h3>
+                                <p class="text-primary font-medium">Tata Power Skill Development Institute (TPSDI)</p>
+                            </div>
+                            <span class="badge mt-2 md:mt-0 w-fit">Jun 2024 – Jul 2024</span>
+                        </div>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-primary mt-1 text-xs"></i>
+                                <span>Analyzed operational parameters of high-voltage power systems with focus on preventive maintenance and safety interlocking.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-primary mt-1 text-xs"></i>
+                                <span>Applied industrial safety standards to identify electrical hazards during high-voltage equipment operations.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Experience 3 -->
+                <div class="relative pl-16 reveal">
+                    <div class="timeline-dot absolute left-4 top-1"></div>
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                            <div>
+                                <h3 class="text-xl font-display font-bold text-white">Database Management Intern</h3>
+                                <p class="text-primary font-medium">e-sigma</p>
+                            </div>
+                            <span class="badge mt-2 md:mt-0 w-fit">Jun 2022 – Jul 2022</span>
+                        </div>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-primary mt-1 text-xs"></i>
+                                <span>Designed and optimized relational database schemas using MySQL with normalization techniques.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check-circle text-primary mt-1 text-xs"></i>
+                                <span>Conducted query performance tuning, improving data retrieval speeds by 30% for enterprise-level applications.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="relative py-24 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <span class="badge mb-4">Featured Work</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+                    Selected <span class="gradient-text">Projects</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    A showcase of production-ready applications spanning computer vision, generative AI, IoT security, and creative deep learning.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Project 1 -->
+                <div class="glass-card rounded-2xl overflow-hidden reveal group">
+                    <div class="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%236366f1\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+                        <i class="fas fa-object-group text-6xl text-primary/40 group-hover:scale-110 transition-transform duration-500"></i>
+                        <div class="absolute top-4 right-4">
+                            <span class="badge bg-green-500/20 text-green-400 border-green-500/30">
+                                <i class="fas fa-bolt mr-1"></i>30+ FPS
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-display font-bold text-white mb-2">YOLOv8 Real-Time Object Detection</h3>
+                        <p class="text-gray-400 text-sm mb-4">
+                            Real-time object detection system achieving 30+ FPS on NVIDIA RTX 4050, identifying 80+ COCO classes across images, video, and live webcam feeds.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="badge text-xs">Python</span>
+                            <span class="badge text-xs">YOLOv8</span>
+                            <span class="badge text-xs">OpenCV</span>
+                            <span class="badge text-xs">PyTorch</span>
+                            <span class="badge text-xs">Gradio</span>
+                            <span class="badge text-xs">Hugging Face</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">200+ demo sessions</span>
+                            <a href="#" class="text-primary text-sm font-medium hover:text-white transition-colors flex items-center gap-1">
+                                View Project <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="glass-card rounded-2xl overflow-hidden reveal group">
+                    <div class="relative h-48 bg-gradient-to-br from-secondary/20 to-accent/20 flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23a855f7\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+                        <i class="fas fa-hand-pointer text-6xl text-secondary/40 group-hover:scale-110 transition-transform duration-500"></i>
+                        <div class="absolute top-4 right-4">
+                            <span class="badge bg-accent/20 text-accent border-accent/30">
+                                <i class="fas fa-hand mr-1"></i>Gestures
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-display font-bold text-white mb-2">AIR-DRAW: Gesture-Controlled Drawing</h3>
+                        <p class="text-gray-400 text-sm mb-4">
+                            Real-time gesture recognition using MediaPipe Hands for 21-point hand landmark detection. Users draw, erase, and switch tools with finger gestures at 30 FPS.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="badge text-xs">MediaPipe</span>
+                            <span class="badge text-xs">JavaScript</span>
+                            <span class="badge text-xs">HTML5 Canvas</span>
+                            <span class="badge text-xs">WebRTC</span>
+                            <span class="badge text-xs">Hugging Face</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">Zero-dependency app</span>
+                            <a href="#" class="text-secondary text-sm font-medium hover:text-white transition-colors flex items-center gap-1">
+                                View Project <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="glass-card rounded-2xl overflow-hidden reveal group">
+                    <div class="relative h-48 bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ef4444\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+                        <i class="fas fa-shield-halved text-6xl text-red-400/40 group-hover:scale-110 transition-transform duration-500"></i>
+                        <div class="absolute top-4 right-4">
+                            <span class="badge bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                                <i class="fas fa-trophy mr-1"></i>2nd Prize
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-display font-bold text-white mb-2">IoT Cybersecurity Intrusion Detection</h3>
+                        <p class="text-gray-400 text-sm mb-4">
+                            Hardware-level network anomaly detection system using ESP32 for real-time unauthorized access detection in industrial environments. Won 2nd Prize at BIS Hackathon.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="badge text-xs">ESP32</span>
+                            <span class="badge text-xs">Arduino</span>
+                            <span class="badge text-xs">Embedded C</span>
+                            <span class="badge text-xs">IoT Security</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">BIS Hackathon Winner</span>
+                            <a href="#" class="text-red-400 text-sm font-medium hover:text-white transition-colors flex items-center gap-1">
+                                View Project <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="glass-card rounded-2xl overflow-hidden reveal group">
+                    <div class="relative h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%2306b6d4\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+                        <i class="fas fa-music text-6xl text-accent/40 group-hover:scale-110 transition-transform duration-500"></i>
+                        <div class="absolute top-4 right-4">
+                            <span class="badge bg-primary/20 text-primary border-primary/30">
+                                <i class="fas fa-book mr-1"></i>IEEE
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-display font-bold text-white mb-2">Music Generation with RNNs</h3>
+                        <p class="text-gray-400 text-sm mb-4">
+                            LSTM-based sequence models for autonomous music composition achieving coherent melodic output across 200+ bar sequences. Published in IEEE Xplore.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="badge text-xs">Python</span>
+                            <span class="badge text-xs">TensorFlow</span>
+                            <span class="badge text-xs">RNN / LSTM</span>
+                            <span class="badge text-xs">Sequence Modeling</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">IEEE Xplore Published</span>
+                            <a href="#" class="text-accent text-sm font-medium hover:text-white transition-colors flex items-center gap-1">
+                                View Paper <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education" class="relative py-24 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <span class="badge mb-4">Academic Background</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+                    Education & <span class="gradient-text">Certifications</span>
+                </h2>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Education 1 -->
+                <div class="glass-card rounded-2xl p-8 reveal">
+                    <div class="flex flex-col md:flex-row md:items-start gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <i class="fas fa-graduation-cap text-primary text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
+                                <h3 class="text-xl font-display font-bold text-white">B.Tech – Electrical & Electronics Engineering</h3>
+                                <span class="badge mt-2 md:mt-0 w-fit">Expected June 2026</span>
+                            </div>
+                            <p class="text-primary font-medium mb-3">Institute of Engineering & Management (IEM), Kolkata</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="badge text-xs">Machine Learning</span>
+                                <span class="badge text-xs">Digital Signal Processing</span>
+                                <span class="badge text-xs">Neural Networks</span>
+                                <span class="badge text-xs">Microcontroller Systems</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education 2 -->
+                <div class="glass-card rounded-2xl p-8 reveal">
+                    <div class="flex flex-col md:flex-row md:items-start gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0">
+                            <i class="fas fa-certificate text-secondary text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
+                                <h3 class="text-xl font-display font-bold text-white">Diploma – Computer Science & Engineering</h3>
+                                <span class="badge mt-2 md:mt-0 w-fit">2023</span>
+                            </div>
+                            <p class="text-secondary font-medium">Al-Kabir Polytechnic, Jamshedpur</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certifications -->
+            <div class="mt-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-6 text-center reveal">Achievements & Certifications</h3>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="glass-card rounded-xl p-5 reveal flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+                            <i class="fas fa-award text-yellow-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-white text-sm">IEEE Published Researcher</h4>
+                            <p class="text-gray-400 text-xs mt-1">"Music Generation with Recurrent Neural Networks for Creative Empowerment" — IEEE Xplore</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-5 reveal flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
+                            <i class="fas fa-trophy text-orange-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-white text-sm">2nd Prize – BIS Hackathon</h4>
+                            <p class="text-gray-400 text-xs mt-1">IoT-based real-time network intrusion detection system</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-5 reveal flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                            <i class="fab fa-microsoft text-blue-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-white text-sm">Microsoft Certified</h4>
+                            <p class="text-gray-400 text-xs mt-1">Build a Computer Vision App with Azure Cognitive Services</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-5 reveal flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                            <i class="fab fa-google text-green-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-white text-sm">Google AI Essentials Certified</h4>
+                            <p class="text-gray-400 text-xs mt-1">Machine Learning and Convolutional Neural Networks</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="relative py-24 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <span class="badge mb-4">Get In Touch</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+                    Let's <span class="gradient-text">Connect</span>
+                </h2>
+                <p class="text-gray-400 max-w-xl mx-auto">
+                    Open to opportunities in Computer Vision, AI/ML Engineering, and Generative AI. Let's build something amazing together.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-6 reveal">
+                    <div class="glass-card rounded-2xl p-6 flex items-center gap-4 hover:border-primary/40 transition-colors cursor-pointer">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="fas fa-envelope text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Email</p>
+                            <p class="text-white font-medium">ahzanimam786@gmail.com</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 flex items-center gap-4 hover:border-primary/40 transition-colors cursor-pointer">
+                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                            <i class="fas fa-phone text-secondary text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Phone</p>
+                            <p class="text-white font-medium">+91-7992264612</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 flex items-center gap-4 hover:border-primary/40 transition-colors cursor-pointer">
+                        <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-accent text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Location</p>
+                            <p class="text-white font-medium">Jamshedpur, Jharkhand, India</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 mt-8">
+                        <a href="https://www.linkedin.com/in/ahzan-imam" target="_blank" class="flex-1 glass-card rounded-xl p-4 text-center hover:border-primary/40 transition-all group">
+                            <i class="fab fa-linkedin text-3xl text-primary mb-2 group-hover:scale-110 transition-transform inline-block"></i>
+                            <p class="text-sm text-gray-400">LinkedIn</p>
+                        </a>
+                        <a href="#" class="flex-1 glass-card rounded-xl p-4 text-center hover:border-primary/40 transition-all group">
+                            <i class="fab fa-github text-3xl text-white mb-2 group-hover:scale-110 transition-transform inline-block"></i>
+                            <p class="text-sm text-gray-400">GitHub</p>
+                        </a>
+                        <a href="#" class="flex-1 glass-card rounded-xl p-4 text-center hover:border-primary/40 transition-all group">
+                            <i class="fas fa-rocket text-3xl text-accent mb-2 group-hover:scale-110 transition-transform inline-block"></i>
+                            <p class="text-sm text-gray-400">Hugging Face</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-8 reveal">
+                    <form id="contact-form" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Name</label>
+                            <input type="text" class="w-full px-4 py-3 rounded-xl bg-darker border border-gray-700 text-white placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" placeholder="Your name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                            <input type="email" class="w-full px-4 py-3 rounded-xl bg-darker border border-gray-700 text-white placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Message</label>
+                            <textarea rows="4" class="w-full px-4 py-3 rounded-xl bg-darker border border-gray-700 text-white placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors resize-none" placeholder="Tell me about your project..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all transform hover:scale-[1.02]">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative py-12 px-4 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left">
+                <h3 class="font-display text-2xl font-bold gradient-text mb-2">Ahzan Imam</h3>
+                <p class="text-gray-500 text-sm">Computer Vision & AI Engineer</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="https://www.linkedin.com/in/ahzan-imam" target="_blank" class="text-gray-400 hover:text-primary transition-colors">
+                    <i class="fab fa-linkedin text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fab fa-github text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-accent transition-colors">
+                    <i class="fas fa-rocket text-xl"></i>
+                </a>
+                <a href="mailto:ahzanimam786@gmail.com" class="text-gray-400 hover:text-secondary transition-colors">
+                    <i class="fas fa-envelope text-xl"></i>
+                </a>
+            </div>
+            <p class="text-gray-600 text-sm"> 2026 Ahzan Imam. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Particle System
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = Math.random() > 0.5 ? 'rgba(99, 102, 241, ' : 'rgba(168, 85, 247, ';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+
+                // Mouse interaction
+                if (mouse.x != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        this.x -= dx * 0.01;
+                        this.y -= dy * 0.01;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color + (Math.random() * 0.3 + 0.1) + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const particleCount = Math.min(window.innerWidth / 10, 100);
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connections
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        ctx.strokeStyle = `rgba(99, 102, 241, ${0.1 * (1 - distance / 150)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        // Scroll Reveal
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+
+                    // Animate skill bars
+                    const skillFills = entry.target.querySelectorAll('.skill-fill');
+                    skillFills.forEach(fill => {
+                        fill.style.width = fill.getAttribute('data-width');
+                    });
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.add('open'));
+        closeMenuBtn.addEventListener('click', () => mobileMenu.classList.remove('open'));
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.remove('open'));
+        });
+
+        // Navbar scroll effect
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-lg', 'shadow-primary/5');
+            } else {
+                nav.classList.remove('shadow-lg', 'shadow-primary/5');
+            }
+        });
+
+        // Contact form
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerText = 'Sending...';
+            btn.disabled = true;
+            const data = {
+                name: form.querySelector('input[type="text"]').value,
+                email: form.querySelector('input[type="email"]').value,
+                message: form.querySelector('textarea').value
+            };
+            try {
+                const response = await fetch('http://localhost:5000/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    btn.innerText = 'Sent!';
+                    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                    form.reset();
+                    setTimeout(() => { btn.innerText = originalText; btn.style.background = ''; btn.disabled = false; }, 3000);
+                }
+            } catch (error) {
+                btn.innerText = 'Error - Try Again';
+                btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                setTimeout(() => { btn.innerText = originalText; btn.style.background = ''; btn.disabled = false; }, 3000);
+            }
+        });
+
+        // Typing effect reset for replay
+        const typingText = document.getElementById('typing-text');
+        setInterval(() => {
+            typingText.style.animation = 'none';
+            setTimeout(() => {
+                typingText.style.animation = 'typing 3s steps(30) forwards, blink 0.75s step-end infinite';
+            }, 100);
+        }, 8000);
+    </script>
+</body>
+</html>
